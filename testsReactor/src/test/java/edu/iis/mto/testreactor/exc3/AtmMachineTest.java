@@ -42,10 +42,31 @@ public class AtmMachineTest {
     }
 
     @Test
-    public void itCompiles(){
-        atmMachine.withdraw(money, card);
+    public void withdraw_amountIs100PL_shouldReleaseOneBanknote100PL(){
+        money = Money.builder().withAmount(100).withCurrency(Currency.PL).build();
+        Payment actual = atmMachine.withdraw(money, card);
+
+        assertThat(actual.getValue().size(),is(1));
+        assertThat(actual.getValue().get(0).getValue(), is(100));
+        assertThat(actual.getValue().get(0).getCurrency(), is(Currency.PL));
     }
 
+    @Test
+    public void withdraw_amountIs120PL_shouldReleaseTwoBanknotes100And20PL(){
+        money = Money.builder().withAmount(120).withCurrency(Currency.PL).build();
+        Payment actual = atmMachine.withdraw(money, card);
 
+        assertThat(actual.getValue().size(),is(2));
+        assertThat(actual.getValue().get(0).getValue(), is(20));
+        assertThat(actual.getValue().get(0).getCurrency(), is(Currency.PL));
+        assertThat(actual.getValue().get(1).getValue(), is(100));
+        assertThat(actual.getValue().get(1).getCurrency(), is(Currency.PL));
+    }
+
+    @Test(expected = WrongMoneyAmountException.class)
+    public void withdraw_amountToSmallToPayInBanknotes_shouldThrowException(){
+        money = Money.builder().withAmount(2).withCurrency(Currency.PL).build();
+        atmMachine.withdraw(money, card);
+    }
 
 }
