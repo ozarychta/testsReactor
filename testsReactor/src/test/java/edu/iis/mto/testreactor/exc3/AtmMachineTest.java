@@ -3,8 +3,7 @@ package edu.iis.mto.testreactor.exc3;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -67,6 +66,19 @@ public class AtmMachineTest {
     public void withdraw_amountToSmallToPayInBanknotes_shouldThrowException(){
         money = Money.builder().withAmount(2).withCurrency(Currency.PL).build();
         atmMachine.withdraw(money, card);
+    }
+
+    @Test(expected = AtmException.class)
+    public void withdraw_moneyDepotDidNotReleaseBanknotes_shouldThrowException() throws MoneyDepotException{
+        doThrow(MoneyDepotException.class).when(moneyDepot).releaseBanknotes(anyListOf(Banknote.class));
+        atmMachine.withdraw(money, card);
+    }
+
+    @Test
+    public void withdraw_moneyDepotReleasedBanknotes_shouldInvokeCommitMethod() throws MoneyDepotException{
+        doNothing().when(moneyDepot).releaseBanknotes(anyListOf(Banknote.class));
+        atmMachine.withdraw(money, card);
+        verify(bankService).commit(token);
     }
 
 }
