@@ -81,4 +81,10 @@ public class AtmMachineTest {
         verify(bankService).commit(token);
     }
 
+    @Test(expected = AtmException.class)
+    public void withdraw_authorizationError_shouldThrowException() throws CardAuthorizationException{
+        when(cardService.authorize(card)).thenThrow(CardAuthorizationException.class);
+        atmMachine.withdraw(money, card);
+    }
+
 }
